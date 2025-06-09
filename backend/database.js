@@ -4,7 +4,7 @@ const URI = 'mongodb://localhost/empleados';
 
 mongoose.connect(URI)
 
-.then(db => console.log('Base De Datos Conectada'))
+.then(db => console.log('La Base De Datos Esta Conectada'))
 
 .catch(err => console.error(err));
 
