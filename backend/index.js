@@ -24,6 +24,8 @@ app.use(cors({origin: 'http://localhost:4200'})); // método para comunicar con 
 
 app .use('/api/empleados',require('./routes/empleado.routes'));
 
+app.use('/api/auth',require('./routes/auth.route'));
+
 // Iniciando el servidor
 
 app.listen(app.get('port'), () => {// esta es una mejor manera de configurar el puerto
