@@ -64,7 +64,7 @@ position: req.body.position,
 
 office: req.body.office,
 
-salary: req.body.salary
+salary: req.body.salary 
 
 };
 
