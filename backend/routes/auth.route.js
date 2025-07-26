@@ -1,24 +1,47 @@
-//Importamos Express para crear el router
 const express = require('express');
 const router = express.Router();
+const Usuario = require('../models/usuario');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
-//Importamos el controlador de autenticación que contiene la logica de login y registro
-const authCtrl = require('../controllers/auth.controller');
+// Registro
+router.post('/registro', async (req, res) => {
+  const { nombre, email, password } = req.body;
 
-/**
- * Ruta para POST /register
- * Permite registrar un nuevo usuario
- * Espera un cuepo (body) con los campos: usename y password
- */
-router.post('/register', authCtrl.register); // Ruta para registrar un nuevo usuario
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const usuario = new Usuario({ nombre, email, password: hashedPassword });
+    await usuario.save();
+    const token = jwt.sign({ _id: usuario._id }, 'secreto');
+    res.status(200).json({ token });
+  } catch (err) {
+    console.error('❌ Error al registrar:', err);
+    res.status(500).json({ error: 'Error al registrar usuario' });
+  }
+});
 
-/**
- * Ruta para POST /login
- * Permite autenticar un usuario existente
- * Espera un cuerpo (body) con los campos: username y password
- * devuelve un token JWT si la autenticación es exitosa
- */
-router.post('/login', authCtrl.login); // Iniciar sesión de un usuario existente
+// Login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
-//Exportamos el router para usarlo en el archivo principal del servidor (index.js)
+  try {
+    const usuario = await Usuario.findOne({ email });
+
+    if (!usuario) {
+      return res.status(401).json({ mensaje: 'Credenciales incorrectas' });
+    }
+
+    const passwordValida = await bcrypt.compare(password, usuario.password);
+    if (!passwordValida) {
+      return res.status(401).json({ mensaje: 'Credenciales incorrectas' });
+    }
+
+    const token = jwt.sign({ _id: usuario._id }, 'secreto');
+    res.status(200).json({ token });
+  } catch (err) {
+    console.error('❌ Error al iniciar sesión:', err);
+    res.status(500).json({ mensaje: 'Error en el servidor' });
+  }
+});
+
 module.exports = router;

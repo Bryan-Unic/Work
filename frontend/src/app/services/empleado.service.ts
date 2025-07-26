@@ -1,55 +1,46 @@
-import { Injectable } from '@angular/core';
+// Este servicio se encarga de gestionar la comunicación entre el frontend Angular y el backend (API REST)
+// para realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre los empleados.
 
-import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';                  // Permite que Angular reconozca esta clase como un servicio
+import { HttpClient } from '@angular/common/http';          // Servicio de Angular para hacer peticiones HTTP
+import { Empleado } from '../models/empleado';              // Importa el modelo de datos Empleado
+import { Observable } from 'rxjs';                          // Permite trabajar con flujos de datos asincrónicos
 
-import { Empleado } from '../models/empleado';
-
-@Injectable ({
-
-providedIn: 'root'
-
+// Decorador que indica que este servicio estará disponible en toda la aplicación (a nivel raíz)
+@Injectable({
+  providedIn: 'root'
 })
-
 export class EmpleadoService {
 
-selectedEmpleado: Empleado;
+  // Propiedad que representa el empleado actualmente seleccionado (por ejemplo, para editar en formularios)
+  selectedEmpleado: Empleado = new Empleado();
 
-empleados: Empleado[ ];
+  // Arreglo que contendrá la lista de empleados recibida desde el backend
+  empleados: Empleado[] = [];
 
-readonly URL_API = 'http://localhost:3000/api/empleados';
+  // URL base del API backend. Aquí se hacen las peticiones HTTP.
+  readonly URL_API = 'http://localhost:3000/api/empleados';
 
-constructor(private http: HttpClient) {
+  // Constructor que inyecta el servicio HttpClient para hacer las peticiones HTTP
+  constructor(private http: HttpClient) { }
 
-this.selectedEmpleado = new Empleado();
+  // Método que obtiene todos los empleados desde el backend
+  getEmpleados(): Observable<Empleado[]> {
+    return this.http.get<Empleado[]>(this.URL_API);
+  }
 
-this.empleados = [ ];
+  // Método que envía un nuevo empleado al backend para ser guardado (operación CREATE)
+  postEmpleado(empleado: Empleado): Observable<Empleado> {
+    return this.http.post<Empleado>(this.URL_API, empleado);
+  }
 
-}
+  // Método que actualiza los datos de un empleado existente (operación UPDATE)
+  putEmpleado(empleado: Empleado): Observable<Empleado> {
+    return this.http.put<Empleado>(`${this.URL_API}/${empleado._id}`, empleado);
+  }
 
-getEmpleados() {
-
-return this.http.get(this.URL_API);
-
-}
-
-PostEmpleado(Empleado:Empleado){
-
-return this.http.post(this.URL_API, Empleado);
-
-}
-
-putEmpleado(Empleado:Empleado){
-
-return this.http.put(this.URL_API + `/${Empleado._id}`, Empleado);//
-
-}
-
-deleteEmpleado(_id: string) {
-
-// Solo se necesita el id, no todo lo del empleado
-
-return this.http.delete(this.URL_API + `/${_id}`);// utilizamos el método delete
-
-}
-
+  // Método que elimina un empleado del backend mediante su ID (operación DELETE)
+  deleteEmpleado(_id: string): Observable<any> {
+    return this.http.delete(`${this.URL_API}/${_id}`);
+  }
 }

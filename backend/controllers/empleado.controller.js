@@ -17,9 +17,7 @@ const empleadoCtrl = {};
 //Obtener todos los empleados
 
 empleadoCtrl.getEmpleados = async (req, res) => {
-
 const empleados = await Empleado.find();
-
 res.json(empleados);
 
 }
@@ -27,25 +25,23 @@ res.json(empleados);
 // Crear empleados
 
 empleadoCtrl.createEmpleados = async (req, res) => {
-
-const empleado = new Empleado(req.body);
-
-await empleado.save();
-
-res.json({
-
-'status': 'Empleado guardado'
-
-});
-
+ try{ 
+    if (req.body._id === '') { 
+delete (req.body._id);
+    }
+    const empleado = new Empleado(req.body);
+    await empleado.save();
+    res.status(201).json(empleado);
+ } catch (err) {
+    res.status(500).json({error: err,message})
+ }
 }
+
 
 //Conseguir un único empleado
 
 empleadoCtrl.getUnicoEmpleado = async (req, res) => {
-
 const empleadoUnico = await Empleado.findById(req.params.id);
-
 res.json(empleadoUnico);
 
 }
